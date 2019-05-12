@@ -35,10 +35,10 @@ describe("About Applying What We Have Learnt", function() {
 
   it("given I'm allergic to nuts and hate mushrooms, it should find a pizza I can eat (functional)", function () {
       var productsICanEat = [];
-
       /* solve using filter() & all() / any() */
+      productsICanEat = products.filter(product => !product.containsNuts && !product.ingredients.some(ingredients => ingredients === "mushrooms"));
 
-      expect(productsICanEat.length).toBe(FILL_ME_IN);
+      expect(productsICanEat.length).toBe(1);
   });
 
   /*********************************************************************************/
@@ -52,13 +52,14 @@ describe("About Applying What We Have Learnt", function() {
       }
     }
 
-    expect(sum).toBe(FILL_ME_IN);
+    expect(sum).toBe(233168);
   });
 
   it("should add all the natural numbers below 1000 that are multiples of 3 or 5 (functional)", function () {
-    var sum = FILL_ME_IN;    /* try chaining range() and reduce() */
+    var sum = _.reduce(_.range(1000).filter(num => (num % 3 === 0 || num % 5 === 0)), function(memo, num){ return memo + num;}, 0);
+    /* try chaining range() and reduce() */
 
-    expect(233168).toBe(FILL_ME_IN);
+    expect(233168).toBe(sum);
   });
 
   /*********************************************************************************/
@@ -78,8 +79,29 @@ describe("About Applying What We Have Learnt", function() {
     var ingredientCount = { "{ingredient name}": 0 };
 
     /* chain() together map(), flatten() and reduce() */
+    // ingredientCount = _.map("{ingredient name}", _.reduce(_.flatten(products.ingredients), function(count, ingredient){
+    //   count[ingredient] = (count[ingredient] || 0) + 1;
+    //   return count;
+    // })); // TypeError: Reduce of empty array with no initial value
 
-    expect(ingredientCount['mushrooms']).toBe(FILL_ME_IN);
+    const chunk = (input, size) => { // creating a native version of _.chunk since this underscore.js library doesn't have it for some reason
+      return input.reduce((arr, item, idx) => {
+        return idx % size === 0
+          ? [...arr, [item]]
+          : [...arr.slice(0, -1), [...arr.slice(-1)[0], item]];
+      }, []);
+    };
+
+    ingredientCount = _.chain(products)
+                        .map(function(name) { return chunk(name.ingredients,1); })
+                        .flatten()
+                        .reduce(function(counts, ingredient) {
+                          counts[ingredient] = (counts[ingredient] || 0) + 1;
+                          return counts;
+                        }, {})
+                        .value();
+
+    expect(ingredientCount['mushrooms']).toBe(2);
   });
 
   /*********************************************************************************/
